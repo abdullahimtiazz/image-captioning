@@ -27,7 +27,7 @@ web_interface = gr.Interface(
   fn= image_caption_generator,
   inputs= gr.Image(),
   outputs= "text",
-  title= "Image Captioning"
+  title= "Image Captioning",
   description= "A simple web app to caption images using an LLM."
 )
 
