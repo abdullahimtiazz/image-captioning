@@ -1,34 +1,32 @@
-#relevant package imports
-import numpy as np
+import gradio as gr
 from transformers import AutoProcessor, BlipForConditionalGeneration
 from PIL import Image
-import gradio as gr
+import numpy as np 
 
-#loading in the pre-trained pre-processor and the model
-processor = AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-base")    #our pre-trained preprocessor
-model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")    #our pre-trained model
+processor = AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
 
-#function to take in an image and output its caption
-def image_caption_generator(input_image: np.ndarray):
-  raw_image = Image.fromarray(input_image).convert("RGB")    #our raw image in RGB format
+def caption_image(input_image: np.ndarray):
+    #Loading up the image in RGB format
+    rawImage = Image.fromarray(input_image).convert("RGB")
+    
+    #Creating inputs through pre-processor
+    providedText = "The image of "
+    inputs = processor(images = rawImage, text = providedText, return_tensors= "pt")
 
-  #running our raw image data through the pre-processor
-  providedText = "The image shows "    #text to be shown before the actual caption
-  inputs = processor(images = raw_image, text = providedText, return_tensors = "pt")    #the input to the model
+    outputs = model.generate(**inputs, max_length= 1000)
 
-  outputs = model.generate(**inputs, max_length_tokens = 50)    #creating our outputs from the model, 50 is an arbitrary number, however, wouldn't recommend to change it.
+    #decoding outputs and creating caption
+    caption = processor.decode(outputs[0], skip_special_tokens= True)
 
-  final_caption = processor.decode(outputs[0], skip_special_tokens= True)
+    return caption
 
-  return final_caption
-
-
-web_interface = gr.Interface(
-  fn= image_caption_generator,
-  inputs= gr.Image(),
-  outputs= "text",
-  title= "Image Captioning",
-  description= "A simple web app to caption images using an LLM."
+demo = gr.Interface(
+    fn= caption_image, 
+    inputs= gr.Image(),
+    outputs= "text", 
+    title = "Image Captioning", 
+    description= "This is a simple web app for generating captions for images using a trained model."
 )
 
-web_interface.launch(share=True)
+demo.launch(share= True)
