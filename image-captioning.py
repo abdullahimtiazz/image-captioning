@@ -14,7 +14,7 @@ def caption_image(input_image: np.ndarray):
     providedText = "The image of "
     inputs = processor(images = rawImage, text = providedText, return_tensors= "pt")
 
-    outputs = model.generate(**inputs, max_length= 1000)
+    outputs = model.generate(**inputs, max_length= 50)
 
     #decoding outputs and creating caption
     caption = processor.decode(outputs[0], skip_special_tokens= True)
